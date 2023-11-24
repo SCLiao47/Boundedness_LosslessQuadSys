@@ -1,5 +1,3 @@
-
-
 function model = model_TwoState_Unbounded(caseNum)
 % example 2D models to illustrate unbounded behaviors
 
@@ -7,30 +5,10 @@ if nargin < 1
     caseNum = 1;
 end
 
-
-%% model info
-model.name = "Case"+num2str(caseNum); 
-model.nx = 2;
-model.m = zeros(model.nx,1);
-
-%% dynamics
-% dx/dt = c + L*x + [x'*Q1*x, ..., x'*Qn*x]'
+name = "TwoStateUB_Case"+num2str(caseNum);
 [c, L, Q] = get_dynamicsCoef(caseNum);
 
-model.c = c;    
-
-% L = [-10 -5; -5 -1];
-
-model.L = L;
-model.Ls = 1/2*(L+L');
-
-model.Q = Q;
-
-% ode
-model.ode = @(t,x) ode_quadraticDyn(model.c, model.L, model.Q, t, x);
-
-%% Energy
-model.dK0 = @(x) model.c'*x + x'*model.Ls*x;
+model = class_Model_LosslessQuad(name, c, L, Q);
 
 end
 

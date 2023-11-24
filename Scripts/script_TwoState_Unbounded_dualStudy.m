@@ -71,7 +71,7 @@ ph_V = plot(xbound, y_Vdir_atm(xbound), 'm--', 'linewidth', 2);
 % ph_V = plot(xbound, y_Vdir_at0(xbound), 'g--', 'linewidth', 2);
 
 % [Null line]
-model.La = model.L - model.Ls;
+% model.La = model.L - model.Ls;
 y_NLine = @(x) -1/model.Q(2,2,1)*(2*model.Q(1,2,1)*x + model.La(1,2));
 ph_NL = plot(xbound, y_NLine(xbound), 'g--', 'linewidth', 2);
 
@@ -149,7 +149,7 @@ ax31 = nexttile([1, 1]);
 ax32 = nexttile(4, [1, 1]);
 ax33 = nexttile([2, 2]);
 
-model.La = model.L - model.Ls;
+% model.La = model.L - model.Ls;
 
 ode_linear_asym = @(t,x) model.La*x;
 ode_quad = @(t,x) [x'*model.Q(:,:,1)*x; x'*model.Q(:,:,2)*x];
