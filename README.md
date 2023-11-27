@@ -15,7 +15,8 @@
   - [ ] Visualization for 2D system
 - [ ] Develop
   - [ ] Visualization for 3D system
-  - [ ] 
+- [ ] Commenting
+  - [ ] text output for scripts in Example Section
 
 
 
