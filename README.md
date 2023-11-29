@@ -8,13 +8,17 @@
 # Todo
 
 - [ ] Migration
-  - [ ] Lorenz analysis
-  - [ ] 
-- [ ] Reimplement / Restructure
-  - [ ] quadratic system model using Class
-  - [ ] Visualization for 2D system
+  - [x] Lorenz analysis
+  - [ ] Cylinder model
 - [ ] Develop
+  - [ ] Visualization for 2D system
   - [ ] Visualization for 3D system
+
+- [ ] quadratic system model using Class
+  - [ ] Initialize
+  - [ ] check lossless nonlinearity
+  - [ ] model data format (JSON?)
+
 - [ ] Commenting
   - [ ] text output for scripts in Example Section
 

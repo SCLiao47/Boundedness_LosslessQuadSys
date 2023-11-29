@@ -55,7 +55,7 @@ function [m, info] = func_findNDShifting(model,option)
     %     cvx_solver SeDuMi
 %             variable a;
             variable m_bounded(nx,1);
-            dual varabile W;
+            dual variable W;
 
             minimize(norm(m_bounded));
 
