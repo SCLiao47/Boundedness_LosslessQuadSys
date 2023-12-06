@@ -37,23 +37,19 @@ function [m, info] = func_findNDShifting(model,option)
         minimize(a);
 
         subject to 
-%             a <= 0;
-
             As = Ls;
             for i = 1:nx
                 As = As - m(i)*Q(:,:,i);
             end
-    %         As <= -1e-6*Inx;
             W : As <= Inx*a;
     cvx_end
     
     % Regularize the coordinate shifting 
     if strcmp(cvx_status, 'Unbounded')
-        warning('Unregularized SDP is unbounded (a*=-inf). Rerun SDP with regularization');
+        warning('Unregularized TRSDP is unbounded below(a*=-inf). Rerun TRSDP with regularization');
         cvx_begin sdp quiet
         cvx_solver mosek
     %     cvx_solver SeDuMi
-%             variable a;
             variable m_bounded(nx,1);
             dual variable W;
 
@@ -64,21 +60,15 @@ function [m, info] = func_findNDShifting(model,option)
                 for i = 1:nx
                     As = As - m_bounded(i)*Q(:,:,i);
                 end
-                W : As <= -1e-6*Inx;
-%                 As <= a*Inx;
+                W : As <= -1e-3*Inx;
         cvx_end
         
         m = m_bounded;
+        a = max(eig(As));
     end
     
     % setting output
-    if strcmp(cvx_status, 'Solved')
-%         if option.verbose
-%             disp('Coordinated shift s.t. As<0 is found:');
-%             disp(m')
-%             fprintf('Most positive eigenvalue a = %.4f\n', a)
-%         end
-        
+    if strcmp(cvx_status, 'Solved')        
         info.feasibility = true;
         info.a = a;
         info.As = As;
@@ -86,6 +76,11 @@ function [m, info] = func_findNDShifting(model,option)
         
         if a < 0
             info.existTR = true;
+            if option.verbose
+                disp('Coordinated shift s.t. As<0 is found:');
+                disp(m')
+                fprintf('Most positive eigenvalue a = %.4f\n', a)
+            end
         else
             info.existTR = false;
         end

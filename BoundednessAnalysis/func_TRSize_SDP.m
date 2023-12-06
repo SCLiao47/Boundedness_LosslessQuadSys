@@ -156,7 +156,7 @@ function [rTrap, info]= func_TRSize_SDP(model, option)
             disp('Trapping region found!');
             fprintf('TR size = %.3f \n', rTrap);
             fprintf('y* =\n')
-            disp(ystar);
+            disp(ystar');
         end
     end
 end

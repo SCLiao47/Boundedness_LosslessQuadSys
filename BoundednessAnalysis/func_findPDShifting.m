@@ -104,13 +104,7 @@ function [m, info] = func_findPDShifting_direct(model, option)
         m = m_bounded;
     end
 
-    if strcmp(cvx_status, 'Solved')
-        if option.verbose
-            disp('Coordinated shift s.t. As>0 is found:');
-            disp(m')
-            fprintf('Most negative eigenvalue b = %.4f\n', b)
-        end
-        
+    if strcmp(cvx_status, 'Solved')       
         info.feasibility = true;
         info.b = b;
         info.As = As;
@@ -118,6 +112,12 @@ function [m, info] = func_findPDShifting_direct(model, option)
         
         if b > 0
             info.existER = true;
+            
+            if option.verbose
+                disp('Coordinated shift s.t. As>0 is found:');
+                disp(m')
+                fprintf('Most negative eigenvalue b = %.4f\n', b)
+            end
         else
             info.existER = false;
         end

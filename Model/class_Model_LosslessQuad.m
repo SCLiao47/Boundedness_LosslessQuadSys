@@ -65,12 +65,12 @@ classdef class_Model_LosslessQuad < matlab.mixin.Copyable
                 obj.A(i,:) = obj.L(i,:) + 2*m'*obj.Q(:,:,i);
             end
             
-            obj.As = 1/2*(obj.A+obj.A');
-            %             % alternative:
-            %             obj.As = 1/2*(obj.L+obj.L');
-            %             for i = 1:obj.nx
-            %                 obj.As = obj.As - m(i)*obj.Q(:,:,i);
-            %             end
+%             obj.As = 1/2*(obj.A+obj.A');
+            % alternative:
+            obj.As = obj.Ls;
+            for i = 1:obj.nx
+                obj.As = obj.As - m(i)*obj.Q(:,:,i);
+            end
             obj.Aa = obj.A - obj.As;
             
             % update ode and power function
