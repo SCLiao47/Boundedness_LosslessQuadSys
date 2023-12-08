@@ -66,6 +66,15 @@ set(gcf,'units','pixels','position',[1 1 width height])
 tiledlayout(4,3,'TileSpacing','compact','Padding','compact');
 ax1=nexttile([3,3]);
 
+% plot coordinate
+xlimits = [-150, 150];
+ylimits = [-85, 150];
+plot(xlimits+[-10, 10], [0,0], 'k', ...
+     'linewidth', 2, 'HandleVisibility','off');
+hold on;
+plot([0,0], ylimits, 'k', ...
+     'linewidth', 2, 'HandleVisibility','off');
+
 % plot trajectory 
 for i = 1:10
     t = Trajs{i}.t;
@@ -118,13 +127,13 @@ set(ph_S2, 'Color', 'b', 'LineStyle', '--', 'LineWidth', 3);
 % set(ph_E0, 'Color', 'g', 'LineStyle', '--', 'LineWidth', 3);
 
 ph_E0 = patch(Y*alpha(2) - cE0(2) + m(2), Z*alpha(3) - cE0(3) + m(3), 'g');
-set(ph_E0, 'FaceAlpha', 0.2, 'LineStyle', '--', 'EdgeColor', 'g', 'LineWidth', 2);
+set(ph_E0, 'FaceAlpha', 0.2, 'EdgeColor', 'g', 'LineWidth', 2);
 % set(ph_E0, 'Color', 'g', 'LineStyle', '--', 'LineWidth', 3);
 
 % ciritcal points
 ystar = info_TR.ystar + m;
-ph_y = scatter(ystar(2,:), ystar(3,:), 150, 'filled', 'square');
-set(ph_y, 'MarkerFaceColor', 'm');
+ph_y = scatter(ystar(2,:), ystar(3,:), 150, 'filled', 'Diamond');
+set(ph_y, 'MarkerFaceColor', [0.4940 0.1840 0.5560]);
 
 
 % ===[ formatting figure ]===
@@ -136,11 +145,16 @@ set(ph_y, 'MarkerFaceColor', 'm');
 % [ 2D ]
 fontsize = 20;
 fontsize2 = 15;
+formatSetting = {'interpreter', 'latex', 'fontsize', 20};
 
-xlabel('$x_2$','Interpreter','latex','fontsize', fontsize);
-ylabel('$x_3$','Interpreter','latex','fontsize', fontsize);
+text(xlimits(2)-10, 6, '$x_2$', formatSetting{:})
+text(10, ylimits(2)-5, '$x_3$', formatSetting{:})
+% xlabel('$x_2$','Interpreter','latex','fontsize', fontsize);
+% ylabel('$x_3$','Interpreter','latex','fontsize', fontsize);
 set(gca,'TickLabelInterpreter','latex','FontSize', fontsize2);
 
+xlim(xlimits);
+ylim(ylimits);
 axis equal
 grid on;
 
@@ -149,7 +163,7 @@ grid on;
 ax2=nexttile([1,2]);
 
 % plot
-for i = 1:num_traj
+for i = 1:10
     t = Trajs{i}.t;
     Em = Trajs{i}.Em;
     
@@ -164,8 +178,8 @@ ylabel('$K_m(x(t))$','Interpreter','latex','fontsize', 16);
 
 % set(gcf, 'Position', [462.6000 13 831.2000 749]);
 
-lgd=legend([ph_S1, ph_S2, ph_E0, ph_y], ...
-       {'$\beta^*$', '$R_m$', '$E$', '$y^*$'}, ...
+lgd=legend([ph_E0, ph_S2, ph_S1, ph_y], ...
+       {'$E$', '$B(m,R_m)$', '$B(m,R_m^*)$', '$y^*$'}, ...
        'fontsize', fontsize2, 'interpreter', 'latex');
 lgd.Layout.Tile=8;
 

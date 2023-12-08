@@ -100,11 +100,11 @@ set(ph_E0, 'FaceAlpha', 0.2, 'LineStyle', '-', 'EdgeColor', 'g', 'LineWidth', 2)
 
 % SDP estimate
 ph_S1 = plot(X*r_NAl + m(1), Y*r_NAl + m(2));
-set(ph_S1, 'Color', 'r', 'LineWidth', 2);
+set(ph_S1, 'Color', 'r', 'LineStyle', '--', 'LineWidth', 2);
 
 % SN estimate
 ph_S2 = plot(X*r_SN_NAl + m(1), Y*r_SN_NAl + m(2));
-set(ph_S2, 'Color', 'b', 'LineStyle','--', 'LineWidth', 2);
+set(ph_S2, 'Color', 'b', 'LineStyle', '--', 'LineWidth', 2);
 
 % equilibrium point
 ph_yeq = scatter(0, 0.25, 100, 'filled', 'square');
@@ -159,11 +159,11 @@ Y = sin(th);
 
 % SDP estimate
 ph_S1 = plot(X*r_NAl + m(1), Y*r_NAl + m(2));
-set(ph_S1, 'Color', 'r', 'LineWidth', 2);
+set(ph_S1, 'Color', 'r', 'LineStyle', '--', 'LineWidth', 2);
 
 % SN estimate
 ph_S2 = plot(X*r_SN_NAl + m(1), Y*r_SN_NAl + m(2));
-set(ph_S2, 'Color', 'b', 'LineStyle','--', 'LineWidth', 2);
+set(ph_S2, 'Color', 'b', 'LineStyle', '--', 'LineWidth', 2);
 
 % [Energy growing region]
 ph_E0 = patch(X*alpha_NAl(1) - cE0_NAl(1) + m(1), Y*alpha_NAl(2) - cE0_NAl(2) + m(2), 'g');
@@ -205,7 +205,7 @@ end
 plot(tspan, [r_NAl; r_NAl], 'r--', 'linewidth', 3);
 plot(tspan, [r_SN_NAl; r_SN_NAl], 'b--', 'linewidth', 3);
 xlabel('Time (sec)', formatSetting{:});
-ylabel('$E_m(x(t))$', formatSetting{:});
+ylabel('$K_0(x(t))$', formatSetting{:});
 
 grid on;
 
