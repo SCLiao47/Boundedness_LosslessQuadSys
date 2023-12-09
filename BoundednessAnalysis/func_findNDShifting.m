@@ -2,7 +2,9 @@
 
 function [m, info] = func_findNDShifting(model,option)
     if nargin < 2
+        option.round_Ndigit = 3;
         option.verbose = false;
+        option.tol = 1e-6;
     end
     
     % initialize output
@@ -87,7 +89,7 @@ function [m, info] = func_findNDShifting(model,option)
     else
         if option.verbose
             disp(['cvx_status: ', cvx_status]);
-%             disp('could not find m such that As<0');
+            disp('could not find m such that As<0');
         end
     end
     

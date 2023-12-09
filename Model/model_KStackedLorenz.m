@@ -42,6 +42,7 @@ end
 % Rotate the system
 if toRotate
 %     warning("Rotation TBI");
+    name = name + "_Rotated";
 
     % get randomized orthogonal matrix, R
     flag = false;
@@ -50,6 +51,14 @@ if toRotate
         
         flag = (rank(R) == nx);
     end
+    
+%     % =============== DEBUG
+%     th = pi/3;
+%     phi = pi/3;
+%     R1 = [cos(th) -sin(th) 0; sin(th) cos(th) 0; 0 0 1];
+%     R2 = [cos(phi), 0, sin(phi); 0 1 0; -sin(phi), 0, cos(phi)];
+%     R = R1*R2;
+%     % ===============
 
     c = R*c;
     L = R*L*R';
@@ -68,9 +77,11 @@ if toRotate
         for j = 1:nx
             temp = temp + R(i,j)*Q(:,:,j);
         end
-        Qtemp(:, :, i) = temp;
+        Qtemp(:, :, i) = 1/2*(temp+temp');
     end
     Q = Qtemp;
+else
+    R = eye(nx);
 end
 
 model = class_Model_LosslessQuad(name, c, L, Q);

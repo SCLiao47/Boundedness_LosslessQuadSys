@@ -5,8 +5,8 @@ init;
 %% setups
 
 % SDP analysis options
-option.round_Ndigit = 3;
-option.verbose = true;
+option.round_Ndigit = nan;
+option.verbose = false;
 option.tol = 1e-6;
 
 % if rerun scalability analysis. False for display-only
@@ -16,11 +16,13 @@ if_sim = true;
 disp("[KStackedLorenz test with K=2]");
 
 K = 2;
-model = model_KStackedLorenz(K);
+model = model_KStackedLorenz(K, true);
 
 % verify the existence of boundedness region
 [m, info_m] = func_findNDShifting(model, option);
 model_shifted = func_ShiftSystem(model, m);
+
+assert(abs(info_m.a - -1) < option.tol); 
 
 %% Scalability studies
 disp("[Scalability Test]");
@@ -31,15 +33,13 @@ if if_sim
     rng(seed);
     
     % setup
-    numK = 10;
-    maxK = 350;
+    numK = 3;
+    maxK = 100;
+    numTest = 1;
     
     gridK = ceil(logspace(0, log10(maxK), numK));
     gridK = unique(gridK);
     numK = length(gridK);
-    
-    numTest = 3;
-    option.verbose = false;
 
     % memory
     T = zeros(numK, numTest);
@@ -52,7 +52,7 @@ if if_sim
         for i = 1:numTest       % repeate numTest of analysis for each dimension.
             fprintf("T%02i ", i);
 
-            model = model_KStackedLorenz(K);
+            model = model_KStackedLorenz(K, true);
 
             % run and time the boundedness analysis
             % ONLY solve for coordinate?
@@ -60,11 +60,11 @@ if if_sim
             [m, info_m] = func_findNDShifting(model, option);
             texc = toc(t0);
             
-            if and(info_m.existTR, norm(m) == sqrt(38^2*K))
+            % validation 
+            if and(info_m.existTR, abs(info_m.a - -1) < option.tol)
                 T(idx_K,i) = texc;
             else
-                warning("info_m.existTR = %i", info_m.existTR);
-                warning("norm(m) = %f, sqrt(38^2*K) = ", norm(m), sqrt(38^2*K));
+                warning("Validation step failed, check");
                 T(idx_K,i) = nan;
             end
         end
