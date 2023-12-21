@@ -54,25 +54,32 @@ else
 end
 
 %% visualization 1, State-space plot
+
+Tmax = 2;
+
+%
 Plot_LorTraj = figure(1); clf
 Plot_LorTraj.WindowStyle='normal';
 Plot_LorTraj.DockControls='off';
-width=900;
-height=900;
+
+% width = 600; height = 800;
+% width = 400; height = width*4/3;
+width = 700; height = width/7*4;
+% width = 700; height = 385.6;
 set(gcf,'units','pixels','position',[1 1 width height])
 
-% figure(1); clf
-% subplot(4,1,[1,2,3]);
-tiledlayout(4,3,'TileSpacing','compact','Padding','compact');
-ax1=nexttile([3,3]);
+% tiledlayout(4,1,'TileSpacing','compact','Padding','compact');
+% ax1=nexttile([3,1]);
+tiledlayout(1,7, 'TileSpacing','compact','Padding','compact');
+ax1 = nexttile([1,4]);
 
 % plot coordinate
-xlimits = [-150, 150];
-ylimits = [-85, 150];
+xlimits = [-120, 120];
+ylimits = [-80, 150];
 plot(xlimits+[-10, 10], [0,0], 'k', ...
      'linewidth', 2, 'HandleVisibility','off');
 hold on;
-plot([0,0], ylimits, 'k', ...
+plot([0,0], ylimits+[-10, 10], 'k', ...
      'linewidth', 2, 'HandleVisibility','off');
 
 % plot trajectory 
@@ -86,8 +93,10 @@ for i = 1:10
 %     hold on;
 %     scatter3(x0(1), x0(2), x0(3), 20, 'filled','MarkerFaceColor', [0.5,0.5,0.5]);
     
+    idx = t <= Tmax;
+
     % yz-plan
-    plot(x(:,2),x(:,3), 'color', [0.5, 0.5, 0.5]);
+    plot(x(idx,2),x(idx,3), 'color', [0.5, 0.5, 0.5]);
     hold on;
     scatter(x0(2), x0(3), 20, 'filled','MarkerFaceColor', [0.5,0.5,0.5]);
 end
@@ -132,7 +141,7 @@ set(ph_E0, 'FaceAlpha', 0.2, 'EdgeColor', 'g', 'LineWidth', 2);
 
 % ciritcal points
 ystar = info_TR.ystar + m;
-ph_y = scatter(ystar(2,:), ystar(3,:), 150, 'filled', 'Diamond');
+ph_y = scatter(ystar(2,:), ystar(3,:), 100, 'filled', 'Diamond');
 set(ph_y, 'MarkerFaceColor', [0.4940 0.1840 0.5560]);
 
 
@@ -144,44 +153,56 @@ set(ph_y, 'MarkerFaceColor', [0.4940 0.1840 0.5560]);
 
 % [ 2D ]
 fontsize = 20;
-fontsize2 = 15;
-formatSetting = {'interpreter', 'latex', 'fontsize', 20};
+fontsize2 = 10;
+formatSetting = {'interpreter', 'latex', 'fontsize', 16};
 
-text(xlimits(2)-10, 6, '$x_2$', formatSetting{:})
-text(10, ylimits(2)-5, '$x_3$', formatSetting{:})
-% xlabel('$x_2$','Interpreter','latex','fontsize', fontsize);
-% ylabel('$x_3$','Interpreter','latex','fontsize', fontsize);
 set(gca,'TickLabelInterpreter','latex','FontSize', fontsize2);
+% text(xlimits(2)-16, -8, '$x_2$', formatSetting{:})
+% text(-17, ylimits(2)-1, '$x_3$', formatSetting{:})
+xlabel('$x_2$',formatSetting{:});
+ylabel('$x_3$',formatSetting{:});
+
 
 xlim(xlimits);
 ylim(ylimits);
 axis equal
 grid on;
+box on;
+
+lgd=legend([ph_E0, ph_S2, ph_S1, ph_y], ...
+       {'$E$', '$B(m,R_m)$', '$B(m,R_m^*)$', '$x^*$'}, ...
+       'fontsize', fontsize2, 'interpreter', 'latex');
+% lgd.Layout.Tile=1;
+lgd.Location = 'NorthWest';
+lgd.Location = 'NorthEast';
 
 %% visualization 2, Energy plot
-% subplot(4,1,4);
-ax2=nexttile([1,2]);
+% ax2=nexttile([1,1]);
+ax2 = nexttile([1,3]);
 
 % plot
 for i = 1:10
     t = Trajs{i}.t;
     Em = Trajs{i}.Em;
     
-    plot(t, Em, 'color', [0.5,0.5,0.5]);
+    idx = t<=Tmax;
+    
+    plot(t(idx), Em(idx), 'color', [0.5,0.5,0.5]);
     hold on;
 end
 
-plot(tspan, [r; r], 'r--', 'linewidth', 3);
-plot(tspan, [r_SN; r_SN], 'b--', 'linewidth', 3);
-xlabel('Time (sec)','fontsize', 16);
-ylabel('$K_m(x(t))$','Interpreter','latex','fontsize', 16);
+plot([0, Tmax], [r; r], 'r--', 'linewidth', 3);
+plot([0, Tmax], [r_SN; r_SN], 'b--', 'linewidth', 3);
+xlabel('Time (sec)', formatSetting{:});
+ylabel('$K_m(x(t))$', formatSetting{:});
+
+grid on;
+box on;
 
 % set(gcf, 'Position', [462.6000 13 831.2000 749]);
 
-lgd=legend([ph_E0, ph_S2, ph_S1, ph_y], ...
-       {'$E$', '$B(m,R_m)$', '$B(m,R_m^*)$', '$y^*$'}, ...
-       'fontsize', fontsize2, 'interpreter', 'latex');
-lgd.Layout.Tile=8;
 
 %%
+width = 700; height = 385;
+set(gcf,'units','pixels','position',[1 1 width height])
 print('Figure/Lorenze_TR_2D','-depsc')

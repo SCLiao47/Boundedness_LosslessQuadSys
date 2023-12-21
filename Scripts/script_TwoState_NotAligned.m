@@ -64,8 +64,8 @@ Plot_Prelim = figure(1); clf
 Plot_Prelim.WindowStyle='normal';
 Plot_Prelim.DockControls='off';
 
-width = 700;
-height=700;
+width = 600;
+height = 600;
 set(gcf,'units','pixels','position',[1 1 width height]);
 tiledlayout(1,1,'TileSpacing','compact','Padding','compact');
 
@@ -113,14 +113,18 @@ set(ph_yeq, 'CData', [1 0 1], 'SizeData', 200);
 % formatting
 formatSetting = {'interpreter', 'latex', 'fontsize', 20};
 
+set(gca,'TickLabelInterpreter','latex','FontSize', 12);
 text(limsize-0.15, 0.1, '$x_1$', formatSetting{:})
 text(0.05, limsize-0.1, '$x_2$', formatSetting{:})
+% xlabel('$x_1$', formatSetting{:});
+% ylabel('$x_2$', formatSetting{:});
 legend([ph_E0, ph_yeq, ph_S2, ph_S1], ...
        {'$E$', 'Equilibrium', '$B(0,R_0)$', 'Proposed'}, ...
-       formatSetting{:}, 'fontsize', 16);
+       formatSetting{:}, 'fontsize', 12);
 
 formatting_PhasePlot(ax1, limsize);
 
+%%
 print('Figure/TwoState_Prelim','-depsc')
 
 %% Plot for example section
@@ -129,12 +133,15 @@ Plot_Apdx = figure(2); clf
 Plot_Apdx.WindowStyle='normal';
 Plot_Apdx.DockControls='off';
 
-width = 600;
-height=600+200;
+% width = 700; height = 600+200;
+width = 700; height = 400;
 set(gcf,'units','pixels','position',[1 1 width height]);
-tiledlayout(4,1,'TileSpacing','compact','Padding','compact');
+% tiledlayout(4,1,'TileSpacing','compact','Padding','compact');
+tiledlayout(1,7,'TileSpacing','compact','Padding','compact');
 
-ax1=nexttile([3,1]);
+% ax1=nexttile([3,1]);
+ax1=nexttile([1,4]);
+
 % plot coordinate
 plot([-limsize, limsize], [0,0], 'k', ...
      'linewidth', 2, 'HandleVisibility','off');
@@ -171,27 +178,30 @@ set(ph_E0, 'FaceAlpha', 0.2, 'LineStyle', '-', 'EdgeColor', 'g', 'LineWidth', 2)
 
 % equilibrium point
 ph_yeq = scatter(0, 0.25, 100, 'filled', 'square');
-set(ph_yeq, 'CData', [1 0 1], 'SizeData', 200);
+set(ph_yeq, 'CData', [1 0 1], 'SizeData', 100);
 
 % [ciritcal points]
 ystar = info_TR_NAl.ystar + m;
 ph_ystar = scatter(ystar(1,:), ystar(2,:), 100, 'filled', 'Diamond');
-set(ph_ystar, 'CData', [0.4940 0.1840 0.5560], 'SizeData', 200);
+set(ph_ystar, 'CData', [0.4940 0.1840 0.5560], 'SizeData', 100);
 
 % formatting
-formatSetting = {'interpreter', 'latex', 'fontsize', 20};
+formatSetting = {'interpreter', 'latex', 'fontsize', 16};
 
-text(limsize-0.15, 0.1, '$x_1$', formatSetting{:})
-text(0.05, limsize-0.1, '$x_2$', formatSetting{:})
+% text(limsize-0.15, 0.1, '$x_1$', formatSetting{:})
+% text(0.05, limsize-0.1, '$x_2$', formatSetting{:})
+xlabel('$x_1$', formatSetting{:});
+ylabel('$x_2$', formatSetting{:});
 legend([ph_E0, ph_yeq, ph_S2, ph_S1, ph_ystar], ...
-       {'$E$', 'Equilibrium', '$B(0, R_0)$', '$B(0, R_0^*)$', '$x^*$'}, ...
-       formatSetting{:}, 'fontsize', 16);
+       {'$E$', '$\dot{x}=0$', '$B(0, R_0)$', '$B(0, R_0^*)$', '$x^*$'}, ...
+       formatSetting{:}, 'fontsize', 10);
 
 formatting_PhasePlot(ax1, limsize)
 
 
 % [visualization 2, Energy plot]
-ax2=nexttile([1,1]);
+% ax2=nexttile([1,1]);
+ax2 = nexttile([1, 3]);
 
 % trajectory
 for i = 1:num_traj
@@ -208,6 +218,11 @@ xlabel('Time (sec)', formatSetting{:});
 ylabel('$K_0(x(t))$', formatSetting{:});
 
 grid on;
+
+%%
+
+width = 700; height = 385;
+set(gcf,'units','pixels','position',[1 1 width height])
 
 print('Figure/TwoState_Example','-depsc')
 

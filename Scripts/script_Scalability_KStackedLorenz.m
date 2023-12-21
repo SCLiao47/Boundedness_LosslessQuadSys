@@ -10,7 +10,7 @@ option.verbose = false;
 option.tol = 1e-4;
  
 % if rerun scalability analysis. False for display-only
-if_sim = true;
+if_sim = ~true;
 
 %% test KStackedLorenz implementation
 disp("[KStackedLorenz test with K=2]");
@@ -86,22 +86,76 @@ if if_sim
     % save the data
     save("Data/KStackedLorenz_RunTime", "gridK", "T_shift", "T_size", "seed");
 else
-    load("Data/KStackedLorenz_RunTime");
+%     load("Data/KStackedLorenz_RunTime");
+
+    load("Data/KStackedLorenz_RunTime_1_223.mat");
+    idx_remove = 19;                % This set of K was out of memories
+    T_shift(idx_remove,:) = [];
+    T_size(idx_remove,:) = [];
+    gridK(idx_remove) = [];
     
     [numK, numTest] = size(T_shift);
 end
 
-%% plotting
-figure(2); clf
-
+%% Data analysis
 T_total = T_shift + T_size;
 
-average = sum(T_total,2)/numTest;
+% statistics
+mean_T = mean(T_total');
+std_T = std(T_total');
 
-loglog(3*gridK, average, '*-', 'linewidth', 2);
+% Complexity analysis via asymptote for large K (3K>100):
+%   T = c* (3K)^u => log(T) = log(c) + u*log(3K)
+%
+% Linear regression on x = [log(c); u]:
+%   Ax = b 
+% with 
+%   A = [1 log(3K_i); ...; 1 log(3K_end)];
+%   b = [log(T_i); ... log(T_end)];
 
-title("Computation Time w.r.t. System Dimension");
-xlabel("# of states");
-ylabel("Execution Time (sec)");
+idx_asy = find(3*gridK > 150);
+num_asy = size(idx_asy,2);
 
-grid on
+A_asy = [ones(num_asy,1) log(3*gridK(idx_asy)')];
+b_asy = log(mean_T(idx_asy)');
+
+x_asy = A_asy\b_asy;
+c_asy = exp(x_asy(1));
+u_asy = x_asy(2);
+
+%% plotting
+Plot_complexity = figure(2); clf
+Plot_complexity.WindowStyle = 'normal';
+Plot_complexity.DockControls = 'off';
+width = 700;            % for IJRNC format, almost fit the 1 column
+height = 350;
+set(gcf, 'units', 'pixels', 'position', [1, 1, width, height]);
+set(gca, 'XScale', 'log', 'YScale','log');
+hold on;
+
+% standard deviation
+ph_std = fill([3*gridK, flip(3*gridK)], [mean_T+std_T, flip(mean_T-std_T)], 0.7*[1 1 1]);
+
+% mean
+ph_mean = loglog(3*gridK, mean_T, '*-', 'linewidth', 2, 'color', 'b');
+
+% asymptote
+grid_asy = [60, 900];
+ph_asy = loglog(grid_asy, c_asy*(grid_asy).^u_asy, '--', 'linewidth' , 2, ...
+                                        'color', 'r');
+
+formatSetting = {'interpreter', 'latex', 'fontsize', 16};
+
+text_asy =sprintf("log(T)=%.2flog(n)%.2f", u_asy, log(c_asy));
+
+% title(sprintf("Computation Time w.r.t. System Dimension. log(T) = %.2f + %.2f * log(n)", log(c_asy), u_asy), ...
+%       formatSetting{:});
+xlabel("State Dimension, $n=3K$", formatSetting{:});
+ylabel("Execution Time, $T$ (sec)", formatSetting{:});
+legend([ph_mean, ph_std, ph_asy], {'Mean'; 'Standard Deviation'; text_asy}, ...
+       'location', 'northwest', formatSetting{:}, 'fontsize', 12);
+
+box on;
+grid on;
+
+print('Figure/StackedLorenz_TimeComplexity','-depsc')
