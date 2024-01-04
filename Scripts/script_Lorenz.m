@@ -152,11 +152,16 @@ set(ph_y, 'MarkerFaceColor', [0.4940 0.1840 0.5560]);
 % zlabel('x3');
 
 % [ 2D ]
-fontsize = 20;
-fontsize2 = 10;
-formatSetting = {'interpreter', 'latex', 'fontsize', 16};
+conf = config();
+size_label = conf.plotting.size_label;
+size_legend = conf.plotting.size_legend;
+size_tick = conf.plotting.size_tick;
+formatSetting = {'interpreter', 'latex', 'fontsize', size_label};
 
-set(gca,'TickLabelInterpreter','latex','FontSize', fontsize2);
+set(gca,'TickLabelInterpreter','latex','FontSize', size_tick);
+ax1.XTick = [-100:25:100];
+ax1.YTick = [-75:25:150];
+
 % text(xlimits(2)-16, -8, '$x_2$', formatSetting{:})
 % text(-17, ylimits(2)-1, '$x_3$', formatSetting{:})
 xlabel('$x_2$',formatSetting{:});
@@ -171,9 +176,7 @@ box on;
 
 lgd=legend([ph_E0, ph_S2, ph_S1, ph_y], ...
        {'$E$', '$B(m,R_m)$', '$B(m,R_m^*)$', '$x^*$'}, ...
-       'fontsize', fontsize2, 'interpreter', 'latex');
-% lgd.Layout.Tile=1;
-lgd.Location = 'NorthWest';
+       'fontsize', size_legend, 'interpreter', 'latex');
 lgd.Location = 'NorthEast';
 
 %% visualization 2, Energy plot
@@ -191,18 +194,20 @@ for i = 1:10
     hold on;
 end
 
-plot([0, Tmax], [r; r], 'r--', 'linewidth', 3);
-plot([0, Tmax], [r_SN; r_SN], 'b--', 'linewidth', 3);
+plot([0, Tmax], [r; r], 'r--', 'linewidth', 2);
+plot([0, Tmax], [r_SN; r_SN], 'b--', 'linewidth', 2);
+
+set(gca,'TickLabelInterpreter','latex','FontSize', size_tick);
 xlabel('Time (sec)', formatSetting{:});
 ylabel('$K_m(x(t))$', formatSetting{:});
 
 grid on;
 box on;
 
-% set(gcf, 'Position', [462.6000 13 831.2000 749]);
-
+width = 700; height = 379;
+set(gcf,'units','pixels','position',[1 1 width height])
 
 %%
-width = 700; height = 385;
-set(gcf,'units','pixels','position',[1 1 width height])
+
 print('Figure/Lorenze_TR_2D','-depsc')
+exportgraphics(Plot_LorTraj, 'Figure/Lorenze_TR_2D.pdf')

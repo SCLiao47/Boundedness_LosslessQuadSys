@@ -111,27 +111,33 @@ ph_yeq = scatter(0, 0.25, 100, 'filled', 'square');
 set(ph_yeq, 'CData', [1 0 1], 'SizeData', 200);
 
 % formatting
-formatSetting = {'interpreter', 'latex', 'fontsize', 20};
+conf = config();
+size_label = conf.plotting.size_label;
+size_legend = conf.plotting.size_legend;
+size_tick = conf.plotting.size_tick;
+formatSetting = {'interpreter', 'latex', 'fontsize', size_label/0.7};
 
-set(gca,'TickLabelInterpreter','latex','FontSize', 12);
-text(limsize-0.15, 0.1, '$x_1$', formatSetting{:})
-text(0.05, limsize-0.1, '$x_2$', formatSetting{:})
-% xlabel('$x_1$', formatSetting{:});
-% ylabel('$x_2$', formatSetting{:});
+set(gca,'TickLabelInterpreter','latex','FontSize', size_tick/0.7);
+% text(limsize-0.17, 0.1, '$x_1$', formatSetting{:})
+% text(0.05, limsize-0.1, '$x_2$', formatSetting{:})
+xlabel('$x_1$', formatSetting{:});
+ylabel('$x_2$', formatSetting{:});
 legend([ph_E0, ph_yeq, ph_S2, ph_S1], ...
        {'$E$', 'Equilibrium', '$B(0,R_0)$', 'Proposed'}, ...
-       formatSetting{:}, 'fontsize', 12);
+       formatSetting{:}, 'fontsize', size_legend/0.7);
 
 formatting_PhasePlot(ax1, limsize);
 
 %%
 print('Figure/TwoState_Prelim','-depsc')
+exportgraphics(Plot_Prelim, 'Figure/TwoState_Prelim.pdf')
+
 
 %% Plot for example section
 % [visualization 1, State-space plot]
-Plot_Apdx = figure(2); clf
-Plot_Apdx.WindowStyle='normal';
-Plot_Apdx.DockControls='off';
+Plot_Exmp = figure(2); clf
+Plot_Exmp.WindowStyle='normal';
+Plot_Exmp.DockControls='off';
 
 % width = 700; height = 600+200;
 width = 700; height = 400;
@@ -185,16 +191,18 @@ ystar = info_TR_NAl.ystar + m;
 ph_ystar = scatter(ystar(1,:), ystar(2,:), 100, 'filled', 'Diamond');
 set(ph_ystar, 'CData', [0.4940 0.1840 0.5560], 'SizeData', 100);
 
+
 % formatting
-formatSetting = {'interpreter', 'latex', 'fontsize', 16};
+formatSetting = {'interpreter', 'latex', 'fontsize', size_label};
 
 % text(limsize-0.15, 0.1, '$x_1$', formatSetting{:})
 % text(0.05, limsize-0.1, '$x_2$', formatSetting{:})
+set(gca,'TickLabelInterpreter','latex','FontSize', size_tick);
 xlabel('$x_1$', formatSetting{:});
 ylabel('$x_2$', formatSetting{:});
 legend([ph_E0, ph_yeq, ph_S2, ph_S1, ph_ystar], ...
-       {'$E$', '$\dot{x}=0$', '$B(0, R_0)$', '$B(0, R_0^*)$', '$x^*$'}, ...
-       formatSetting{:}, 'fontsize', 10);
+       {'$E$', '$x_{eq}$', '$B(0, R_0)$', '$B(0, R_0^*)$', '$x^*$'}, ...
+       formatSetting{:}, 'fontsize', size_legend);
 
 formatting_PhasePlot(ax1, limsize)
 
@@ -212,19 +220,23 @@ for i = 1:num_traj
     hold on;
 end
 
-plot(tspan, [r_NAl; r_NAl], 'r--', 'linewidth', 3);
-plot(tspan, [r_SN_NAl; r_SN_NAl], 'b--', 'linewidth', 3);
+plot(tspan, [r_NAl; r_NAl], 'r--', 'linewidth', 2);
+plot(tspan, [r_SN_NAl; r_SN_NAl], 'b--', 'linewidth', 2);
+
+set(gca,'TickLabelInterpreter','latex','FontSize', size_tick);
 xlabel('Time (sec)', formatSetting{:});
 ylabel('$K_0(x(t))$', formatSetting{:});
 
 grid on;
 
-%%
-
-width = 700; height = 385;
+width = 700; height = 379;
 set(gcf,'units','pixels','position',[1 1 width height])
 
+%%
+
 print('Figure/TwoState_Example','-depsc')
+exportgraphics(Plot_Exmp, 'Figure/TwoState_Example.pdf', ...
+               'ContentType', 'vector')
 
 %% function Phase Plot setup
 function formatting_PhasePlot(ax1, limsize)

@@ -144,18 +144,28 @@ grid_asy = [60, 900];
 ph_asy = loglog(grid_asy, c_asy*(grid_asy).^u_asy, '--', 'linewidth' , 2, ...
                                         'color', 'r');
 
-formatSetting = {'interpreter', 'latex', 'fontsize', 16};
+                                    
+% formatting
+conf = config();
+size_label = conf.plotting.size_label;
+size_legend = conf.plotting.size_legend;
+size_tick = conf.plotting.size_tick;
+formatSetting = {'interpreter', 'latex', 'fontsize', size_label};
 
 text_asy =sprintf("log(T)=%.2flog(n)%.2f", u_asy, log(c_asy));
 
 % title(sprintf("Computation Time w.r.t. System Dimension. log(T) = %.2f + %.2f * log(n)", log(c_asy), u_asy), ...
 %       formatSetting{:});
+set(gca,'TickLabelInterpreter','latex','FontSize', size_tick);
 xlabel("State Dimension, $n=3K$", formatSetting{:});
 ylabel("Execution Time, $T$ (sec)", formatSetting{:});
 legend([ph_mean, ph_std, ph_asy], {'Mean'; 'Standard Deviation'; text_asy}, ...
-       'location', 'northwest', formatSetting{:}, 'fontsize', 12);
+       'location', 'northwest', formatSetting{:}, 'fontsize', size_legend);
 
 box on;
 grid on;
 
+
+%% output
 print('Figure/StackedLorenz_TimeComplexity','-depsc')
+exportgraphics(Plot_complexity,'Figure/StackedLorenz_TimeComplexity.pdf')
