@@ -211,3 +211,13 @@ set(gcf,'units','pixels','position',[1 1 width height])
 
 print('Figure/Lorenze_TR_2D','-depsc')
 exportgraphics(Plot_LorTraj, 'Figure/Lorenze_TR_2D.pdf')
+
+%% for github repo
+% width = 700; height = 500;
+set(gcf,'units','pixels','position',[1 1 width height])
+
+lgd=legend([ph_E0, ph_S2, ph_S1, ph_y], ...
+       {'States with Non-Decreasing Energy', 'Trapping Region: Prior State-of-the-Art', 'Trapping Region: Proposed Method', 'Critical States'}, ...
+       'fontsize', size_legend);
+
+exportgraphics(Plot_LorTraj, 'Figure/Lorenze_TR_2D.png')
