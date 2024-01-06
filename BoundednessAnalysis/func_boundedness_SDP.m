@@ -52,7 +52,37 @@ else
     % there is no trapping region exists
     
     if options.verbose
-        disp('No trapping region exists. Futher analysis is needed to conclude boundedness.');
+        disp('No trapping region exists. Futher analysis is needed to conclude boundedness');
+    end
+    
+    [mPD, info_mPD] = func_findPDShifting(model, options);
+    
+    % setting output
+    info.mPD = mPD;
+    info.info_mPD = info_mPD;
+    info.existER = info_mPD.existER;
+
+    if info_mPD.existER  % Escape Region analysis
+        isBounded = false;
+        
+        model_shifted = func_ShiftSystem(model, mPD);
+        
+        % compute ER size
+        % info_ER.ystar * (1 + eps) is an initial condition for unbounded
+        % trajectory.
+        [delta_SDP, info_ER] = func_ERSize_SDP(model_shifted, options);
+      
+        if options.verbose
+            disp('Escape region exists. The model is UNbounded.');
+        end
+        
+        % setting output
+        info.delta_SDP = delta_SDP;
+        info.info_ER = info_ER;
+    else
+        if options.verbose
+            disp('Neither TR and ER exists. Futher analysis is needed to conclude boundedness');
+        end
     end
 end
 end
