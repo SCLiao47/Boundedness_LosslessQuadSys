@@ -1,6 +1,6 @@
-% This script demonstrate verify the boundedness of Lorenze system
-
-init;
+% This script verify the boundedness of Lorenze system
+%
+% Corresponds to Section 4.2 of Liao et. al, 2024
 
 %% setups
 
@@ -54,7 +54,6 @@ else
 end
 
 %% visualization 1, State-space plot
-
 Tmax = 2;
 
 %
@@ -62,14 +61,9 @@ Plot_LorTraj = figure(1); clf
 Plot_LorTraj.WindowStyle='normal';
 Plot_LorTraj.DockControls='off';
 
-% width = 600; height = 800;
-% width = 400; height = width*4/3;
 width = 700; height = width/7*4;
-% width = 700; height = 385.6;
 set(gcf,'units','pixels','position',[1 1 width height])
 
-% tiledlayout(4,1,'TileSpacing','compact','Padding','compact');
-% ax1=nexttile([3,1]);
 tiledlayout(1,7, 'TileSpacing','compact','Padding','compact');
 ax1 = nexttile([1,4]);
 
@@ -88,11 +82,6 @@ for i = 1:10
     x = Trajs{i}.x;
     x0 = x(1,:);
     
-%     % 3D
-%     plot3(x(:,1),x(:,2),x(:,3), 'color', [0.5, 0.5, 0.5]);
-%     hold on;
-%     scatter3(x0(1), x0(2), x0(3), 20, 'filled','MarkerFaceColor', [0.5,0.5,0.5]);
-    
     idx = t <= Tmax;
 
     % yz-plan
@@ -100,25 +89,6 @@ for i = 1:10
     hold on;
     scatter(x0(2), x0(3), 20, 'filled','MarkerFaceColor', [0.5,0.5,0.5]);
 end
-
-% % ===[ 3D ]===
-% % Trapping region
-% [X,Y,Z] = sphere;
-% 
-% ph_S1 = surf(X*r + m(1), Y*r + m(2), Z*r + m(3));
-% set(ph_S1, 'FaceColor', 'None', 'EdgeColor', 'r');
-% 
-% ph_S2 = surf(X*r_SN + m(1), Y*r_SN + m(2), Z*r_SN + m(3));
-% set(ph_S2, 'FaceColor', 'None', 'EdgeColor', 'b');
-% 
-% ph_E0 = surf(X*alpha(1) - cE0(1) + m(1), ...
-%              Y*alpha(2) - cE0(2) + m(2), ...
-%              Z*alpha(3) - cE0(3) + m(3));
-% set(ph_E0, 'FaceColor', 'None', 'EdgeColor', 'g');
-% 
-% % ciritcal points
-% ystar = info_TR.ystar + m;
-% ph_y = scatter3(ystar(1,:), ystar(2,:), ystar(3,:), 100, 'filled', '^');
 
 % ===[ 2D ]===
 % Trapping region
@@ -132,25 +102,15 @@ set(ph_S1, 'Color', 'r', 'LineStyle', '--', 'LineWidth', 3);
 ph_S2 = plot(Y*r_SN + m(2), Z*r_SN + m(3));
 set(ph_S2, 'Color', 'b', 'LineStyle', '--', 'LineWidth', 3);
 
-% ph_E0 = plot(Y*alpha(2) - cE0(2) + m(2), Z*alpha(3) - cE0(3) + m(3));
-% set(ph_E0, 'Color', 'g', 'LineStyle', '--', 'LineWidth', 3);
-
 ph_E0 = patch(Y*alpha(2) - cE0(2) + m(2), Z*alpha(3) - cE0(3) + m(3), 'g');
 set(ph_E0, 'FaceAlpha', 0.2, 'EdgeColor', 'g', 'LineWidth', 2);
-% set(ph_E0, 'Color', 'g', 'LineStyle', '--', 'LineWidth', 3);
 
 % ciritcal points
 ystar = info_TR.ystar + m;
 ph_y = scatter(ystar(2,:), ystar(3,:), 100, 'filled', 'Diamond');
 set(ph_y, 'MarkerFaceColor', [0.4940 0.1840 0.5560]);
 
-
 % ===[ formatting figure ]===
-% % [ 3D ]
-% xlabel('x1');
-% ylabel('x2');
-% zlabel('x3');
-
 % [ 2D ]
 conf = config();
 size_label = conf.plotting.size_label;
@@ -162,11 +122,8 @@ set(gca,'TickLabelInterpreter','latex','FontSize', size_tick);
 ax1.XTick = [-100:25:100];
 ax1.YTick = [-75:25:150];
 
-% text(xlimits(2)-16, -8, '$x_2$', formatSetting{:})
-% text(-17, ylimits(2)-1, '$x_3$', formatSetting{:})
 xlabel('$x_2$',formatSetting{:});
 ylabel('$x_3$',formatSetting{:});
-
 
 xlim(xlimits);
 ylim(ylimits);
@@ -180,7 +137,6 @@ lgd=legend([ph_E0, ph_S2, ph_S1, ph_y], ...
 lgd.Location = 'NorthEast';
 
 %% visualization 2, Energy plot
-% ax2=nexttile([1,1]);
 ax2 = nexttile([1,3]);
 
 % plot
@@ -207,14 +163,14 @@ box on;
 width = 700; height = 379;
 set(gcf,'units','pixels','position',[1 1 width height])
 
-%%
+%% saving figures
 
 print('Figure/Lorenze_TR_2D','-depsc')
 exportgraphics(Plot_LorTraj, 'Figure/Lorenze_TR_2D.pdf')
 
 exportgraphics(Plot_LorTraj, 'Figure/Lorenze_TR_2D.pdf')
 
-%% for github repo
+%% figure for github repo
 % width = 700; height = 500;
 set(gcf,'units','pixels','position',[1 1 width height])
 

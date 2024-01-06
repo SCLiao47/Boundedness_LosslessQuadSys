@@ -1,12 +1,11 @@
 function model = model_TwoState_Alignment(ifAlign)
-    % an example model to illustrate conservative estimation of bound by
-    % Schlegel and Noack. The model is a two-state linear-quadratic system 
+    % an example model to illustrate conservative bound by Schlegel 
+    % and Noack. The model is a two-state linear-quadratic system 
     % with negative definte linear part. The system satisfies the TR
     % condition without any coordinate shift. 
     
-    % xdot = c + Lx + phi(x)
-    %   - phi(x) is an energy preserving nonlinearity. Choosen as the
-    %     Schlegel and Noack bounded 2D example.
+    % xdot = c + Lx + f(x)
+    %   - f(x) is an energy preserving nonlinearity.
     %   - L is choosen as a negative definite symmetric matrix with two
     %     different eigenvalues. L = diag([lam1, lam2]), where lam1 > lam2.
     %   - c is choosen to be ||c|| be a constant with [ifAlign] to the

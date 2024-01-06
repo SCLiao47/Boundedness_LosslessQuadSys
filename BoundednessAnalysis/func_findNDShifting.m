@@ -1,6 +1,8 @@
-
-
 function [m, info] = func_findNDShifting(model,option)
+% solve trapping region condition using SDP. 
+%
+% Corresponding to Section 3.1 of Liao et. al, 2024
+
     if nargin < 2
         option.round_Ndigit = 3;
         option.verbose = false;
@@ -19,6 +21,7 @@ function [m, info] = func_findNDShifting(model,option)
     Inx = eye(nx);
     
     %% filtering the data matrix
+    % if don't filter, set option.round_Ndigit = nan.
     if ~isnan(option.round_Ndigit)
         Ls = round(Ls, option.round_Ndigit);
         Q = round(Q, option.round_Ndigit);
@@ -27,8 +30,6 @@ function [m, info] = func_findNDShifting(model,option)
     %% solve by SDP
     % This SDP push As most further to negative definite (the most positive
     % eigenvalue is minimized). 
-    % [!!!] We conjecture that this eigenvalue is lower bounded.
-    
     cvx_begin sdp quiet
     cvx_solver mosek
 %     cvx_solver SeDuMi
@@ -46,7 +47,8 @@ function [m, info] = func_findNDShifting(model,option)
             W : As <= Inx*a;
     cvx_end
     
-    % Regularize the coordinate shifting 
+    % The SDP can be unbounded, i.e., a*=-inf. 
+    % Redo the SDP with regularization of the coordinate shifting 
     if strcmp(cvx_status, 'Unbounded')
         warning('Unregularized TRSDP is unbounded below(a*=-inf). Rerun TRSDP with regularization');
         cvx_begin sdp quiet

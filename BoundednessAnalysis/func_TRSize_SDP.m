@@ -1,4 +1,8 @@
 function [rTrap, info]= func_TRSize_SDP(model, option)
+% solving the size of trapping region by QCQP through dual SDP
+%
+% % Corresponding to Section 3.2 and 3.3 of Liao et. al, 2024
+
     if nargin < 2
         option.verbose = false;
         option.tol = 1e-6;
@@ -8,7 +12,7 @@ function [rTrap, info]= func_TRSize_SDP(model, option)
     As = model.As;
     d = model.d;
 
-    % check if Ls is negative definite
+    % check if As is negative definite
     [~, flag] = chol(-As);
     if ~(flag == 0)
         disp('As is not negative definite!');
@@ -27,9 +31,9 @@ function [rTrap, info]= func_TRSize_SDP(model, option)
 
     %% SDP to find max y'y s.t. y'Asy+d'y>=0
     flag_Lag = false;
-    flag_Rank = false;
+    % flag_Rank = false;
     
-    %% [Lagrangian dual formulation]
+    %% [Lagrangian dual SDP formulation]
     cvx_begin sdp quiet
     cvx_solver mosek       
         variable gam(1,1);
@@ -48,9 +52,9 @@ function [rTrap, info]= func_TRSize_SDP(model, option)
         % check Astar <= 0
         Astar = Inx + lam*As;
         % check d \in range(Astar)
-        assert(norm(Astar*d) >= eps, "d is in range of Astar!"); 
+        assert(norm(Astar*d) >= eps, "d is not in range of Astar!"); 
         
-        % [compute ystar using KKT condition] 
+        %% [compute ystar using KKT condition] 
         % ystar = y0 + v*c, where y0 = -lam/2*(Astar\d) and v is the
         %   nullspace of Astar
         %
@@ -83,7 +87,7 @@ function [rTrap, info]= func_TRSize_SDP(model, option)
             ystar = ['A ', num2str(nx-r), '-dimensional shpere.'];
         end
         
-        %% [check solutions]
+        % [check ystar solutions]
         if r >= nx-1
             Lag = @(y, lam) y'*y + lam*(y'*As*y + d'*y); 
 
@@ -98,34 +102,11 @@ function [rTrap, info]= func_TRSize_SDP(model, option)
 
                 % 4. ystar'*ystar == L(ystar, lam*)
                 [ifPass, RelErr] = check_RelTol(gam, ys'*ys, option);
-%                 if ~check_RelTol(gam, ys'*ys, option)
-                if ~ifPass
+                if ~ifPass      % if ~check_RelTol(gam, ys'*ys, option)
                     warning(strcat("RelTol not satisified: gam* == ystar'*ystar with relative error ", num2str(RelErr)));
                 end
             end
         end
-    end
-        
-    %% [Rank-relaxation formulation]
-    cvx_begin sdp quiet
-    cvx_solver mosek
-        variable y(nx);
-        variable Y(nx,nx) symmetric;
-        
-        minimize(-trace(Y));
-        
-        subject to 
-            trace(As*Y) + d'*y >= 0;
-            [Y y; y' 1] >=0;
-    cvx_end
-    cvx_status_RR = cvx_status;
-    
-    if strcmp(cvx_status_RR, 'Solved')   
-        flag_Rank = true;
-        
-        % [check solution] Lagrangian dual == Rank relaxation
-        assert(check_RelTol(gam, trace(Y), option), ...
-                "Optimums of the two SDP are not equal");
     end
     
     %% Set output
@@ -147,11 +128,6 @@ function [rTrap, info]= func_TRSize_SDP(model, option)
         info.ystar = ystar;
         info.rank = r;
         
-        % Rank-relaxation solution
-        info.cvx_RR = cvx_status_RR;
-        info.RR_y = y;
-        info.RR_Y = Y;
-        
         if option.verbose
             disp('Trapping region found!');
             fprintf('TR size = %.3f \n', rTrap);
@@ -167,7 +143,7 @@ function [ifPass, RelErr] = check_RelTol(a, b, option)
 end
 
 
-    %% second formulation
+%% second formulation
 %     cvx_begin sdp quiet
 %     cvx_solver mosek       
 %         variable gam_ti(1,1);
@@ -183,3 +159,27 @@ end
     
 %     disp(gam);
 %     disp(gam2);
+
+% function [flag_Rank, cvx_status_RR, y, Y] = RankRelaxation(As, d, gam)
+%     %% [Rank-relaxation formulation]
+%     cvx_begin sdp quiet
+%     cvx_solver mosek
+%         variable y(nx);
+%         variable Y(nx,nx) symmetric;
+%         
+%         minimize(-trace(Y));
+%         
+%         subject to 
+%             trace(As*Y) + d'*y >= 0;
+%             [Y y; y' 1] >=0;
+%     cvx_end
+%     cvx_status_RR = cvx_status;
+%     
+%     if strcmp(cvx_status_RR, 'Solved')   
+%         flag_Rank = true;
+%         
+%         % [check solution] Lagrangian dual == Rank relaxation
+%         assert(check_RelTol(gam, trace(Y), option), ...
+%                 "Optimums of the two SDP are not equal");
+%     end
+% end

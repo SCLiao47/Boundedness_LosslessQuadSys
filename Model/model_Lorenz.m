@@ -1,6 +1,6 @@
-
-
 function model = model_Lorenz()
+    % model of Lorenz Attractor.  
+    %
     % dx/dt = c + L*x + [x'*Q1*x, ..., x'*Qn*x]'
 
     name = "Lorenz_Chaotic";

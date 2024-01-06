@@ -1,6 +1,6 @@
-% This script demonstrate verify the boundedness of Lorenze system
-
-init;
+% This script verify the boundedness of stacked Lorenze systems
+%
+% Corresponds to Section 4.3 of Liao et. al, 2024
 
 %% setups
 
@@ -143,7 +143,6 @@ ph_mean = loglog(3*gridK, mean_T, '*-', 'linewidth', 2, 'color', 'b');
 grid_asy = [60, 900];
 ph_asy = loglog(grid_asy, c_asy*(grid_asy).^u_asy, '--', 'linewidth' , 2, ...
                                         'color', 'r');
-
                                     
 % formatting
 conf = config();

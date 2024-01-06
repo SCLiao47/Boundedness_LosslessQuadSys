@@ -5,8 +5,9 @@ function [model, R] = model_KStackedLorenz(K, toRotate)
 % stacked system.
 %
 % Note that the data in this example is sparse both constant, linear, and
-% quadratic terms. Customized SDP solver could utilize the structure and
-% accelerate the analysis accordingly.
+% quadratic terms when not rotated. Customized SDP solver could utilize 
+% the structure and accelerate the analysis accordingly. However, the 
+% rotated case is usually dense and the structure is lost.
 
 switch nargin
     case 0

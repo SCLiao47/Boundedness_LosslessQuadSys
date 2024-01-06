@@ -1,4 +1,6 @@
-init;
+% This script demonstrate verify the boundedness of a two state system
+%
+% Corresponds to Section 4.2 of Liao et. al, 2024
 
 %% setups
 ifAlign = false;

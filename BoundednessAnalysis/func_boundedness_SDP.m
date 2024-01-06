@@ -2,9 +2,8 @@ function [isBounded, info] = func_boundedness_SDP(model, options)
 % [isBounded, info] = func_boundedness_SDP(model, options)
 %
 % DESCRIPTION
-%   This functino analyze the boundedness of given model using the SDP
-%   approach based on S&N Trapping Theorem.
-%
+%   This functino analyze the boundedness of given model using the trapping
+%   region by the SDP approach.
 
 %% check option
 if nargin < 2
