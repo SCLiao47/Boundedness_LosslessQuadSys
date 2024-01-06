@@ -1,19 +1,12 @@
-# TOFIX
-- [x] README
-  - [x] intro
-  - [x] figure
-  - [x] Dependency
-  - [x] Structure
-  - [x] Reproducing
-- [x] scripts/function
-  - [x] commenting
-  - [x] documentation
-  - [x] clean up unnecessary scripts
-
 # Boundedness_LosslessQuadSys
 This repository contains the MATLAB implementation and numerical results of the paper "**A Convex Optimization Approach to Compute Trapping Regions for Lossless Quadratic Systems**" by _[Shih-Chi Liao](https://scliao47.github.io/), A. Leonid Heide, [Maziar S. Hemati](https://dept.aem.umn.edu/people/faculty/mhemati/index.html), [Peter Seiler](https://seiler.engin.umich.edu/)_.
 
-<!-- [[Paper on arXiv]()\] -->
+The manuscript is currently under review. You can find the pre-print version [here]().
+<!-- \[[Paper on ]()\] / 
+\[[Paper on arXiv]()\] / 
+\[[Slides]()\] /
+\[[Poster]()\] -->
+
 
 <!-- FIGURE -->
 ![Trapping Region of Lorenz system.](/Figure/Lorenze_TR_2D.png) \
@@ -47,6 +40,9 @@ Note that the script `script/script_Scalability_KStackedLorenz.m` defaults to vi
 
 # How to cite
 If you find this project helpful, please cite the following reference:
+```
+TBA
+```
 
 # Acknowledgement
 * This research was supported by the This material is based upon work supported by the Army Research Office under grant number W911NF-20-1-0156 and the Air Force Office of Scientific Research under grant number FA9550-21-1-0434.
