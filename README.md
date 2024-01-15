@@ -41,7 +41,14 @@ Note that the script `script/script_Scalability_KStackedLorenz.m` defaults to vi
 # How to cite
 If you find this project helpful, please cite the following reference:
 ```
-TBA
+@misc{liao2024convex,
+      title={A Convex Optimization Approach to Compute Trapping Regions for Lossless Quadratic Systems}, 
+      author={Shih-Chi Liao and A. Leonid Heide and Maziar S. Hemati and Peter J. Seiler},
+      year={2024},
+      eprint={2401.04787},
+      archivePrefix={arXiv},
+      primaryClass={math.OC}
+}
 ```
 
 # Acknowledgement
