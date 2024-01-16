@@ -7,3 +7,5 @@ addpath(genpath('Model'));
 addpath('Data');
 
 % addpath('PhasePlane');
+
+addpath('Utils');
