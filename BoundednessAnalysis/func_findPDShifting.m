@@ -1,7 +1,7 @@
 
 function [m, info] = func_findPDShifting(model, option)
 
-    disp('==== Inverse-time study: START ====');
+%     disp('==== Inverse-time study: START ====');
     [m, info] = func_findPDShifting_invTime(model, option);
     
     % [for debugging]
@@ -10,7 +10,7 @@ function [m, info] = func_findPDShifting(model, option)
     assert( sum(abs(m - m_direct)) == 0, ...
         "INVTIME and DIRECT methods are not consistent!")
     
-    disp('==== Inverse-time study: END ====');
+%     disp('==== Inverse-time study: END ====');
 end
 
 %implement finding PD shift m with findNDShifting with inverstime model
