@@ -1,7 +1,7 @@
 # Boundedness_LosslessQuadSys
 This repository contains the MATLAB implementation and numerical results of the paper "**A Convex Optimization Approach to Compute Trapping Regions for Lossless Quadratic Systems**" by _[Shih-Chi Liao](https://scliao47.github.io/), A. Leonid Heide, [Maziar S. Hemati](https://dept.aem.umn.edu/people/faculty/mhemati/index.html), [Peter Seiler](https://seiler.engin.umich.edu/)_.
 
-The manuscript is currently under review. You can find the pre-print version [here]().
+The manuscript is currently under review. You can find the pre-print version [here](https://arxiv.org/abs/2401.04787).
 <!-- \[[Paper on ]()\] / 
 \[[Paper on arXiv]()\] / 
 \[[Slides]()\] /
