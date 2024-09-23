@@ -6,6 +6,8 @@ The manuscript is currently under review. You can find the pre-print version [he
 \[[Paper on arXiv]()\] / 
 \[[Slides]()\] /
 \[[Poster]()\] -->
+[![DOI](https://zenodo.org/badge/721376368.svg)](https://zenodo.org/doi/10.5281/zenodo.13829999)
+
 
 
 <!-- FIGURE -->
