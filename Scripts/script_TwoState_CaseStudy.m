@@ -2,8 +2,8 @@ init;
 
 %% Setup
 
-CaseNum = 9;
-mag_La = -2;
+CaseNum = 5;
+mag_La = 0.2;
 
 % SDP options
 option.round_Ndigit = 3;

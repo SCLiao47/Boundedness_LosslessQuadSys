@@ -26,6 +26,9 @@ classdef class_Model_LosslessQuad < matlab.mixin.Copyable
     
     methods
         function obj = class_Model_LosslessQuad(name, c, L, Q, m)
+            if isempty(name)
+                name = "model";
+            end
             obj.name = name;
             obj.nx = size(c,1);
             
@@ -83,8 +86,35 @@ classdef class_Model_LosslessQuad < matlab.mixin.Copyable
             LInv = -obj.L;
             QInv = -obj.Q;
             
-            model_invTime = class_Model_LosslessQuad(obj.name, ...
-                cInv, LInv, QInv, obj.m);
+            model_invTime = class_Model_LosslessQuad(...
+                                obj.name + "_invTime", ...
+                                cInv, LInv, QInv, obj.m);
+        end
+        
+        function model_rot = func_RotateSystem(obj, U)
+            % check dimension of U
+            assert(all(size(U) == [obj.nx, obj.nx]), 'Check dimension of U');
+            
+            % Rotate dynamics
+            chat = U*obj.c;
+            Lhat = U*obj.L*U';
+            
+            Qhat = 0*obj.Q;
+            for i = 1:obj.nx
+                temp = zeros(obj.nx, obj.nx);
+                for k = 1:obj.nx
+                    temp = temp + U(i,k)*obj.Q(:,:,k);
+                end
+                Qhat(:,:,i) = U*temp*U';
+            end
+            
+            % shift
+            mhat = U*obj.m;
+            
+            % create model
+            model_rot = class_Model_LosslessQuad(...
+                            obj.name + "_rotated", ...
+                            chat, Lhat, Qhat, mhat);
         end
     end
 end
