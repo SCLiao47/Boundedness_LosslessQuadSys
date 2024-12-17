@@ -84,6 +84,10 @@ def func_TRSize_SDP(model: Dict, option: Optional[Dict] = None) -> Tuple[float, 
         
         if r == nx:
             ystar = y0
+            ystar = ystar.reshape(1, -1, 1)
+
+            # Verify ystar has shape (1, nx, 1)
+            assert ystar.shape == (1, nx, 1), f"ystar shape {ystar.shape} does not match expected shape (1, {nx}, 1)"
         elif r == nx-1:
             # Solve CS, which is a quadratic equation in c
             coef1 = v @ As @ v.T
@@ -96,11 +100,23 @@ def func_TRSize_SDP(model: Dict, option: Optional[Dict] = None) -> Tuple[float, 
             ystar = y0 + v.T @ c
             
             # Verify ystar has shape (2, nx, 1)
-            assert ystar.shape == (2, nx, 1), f"ystar shape {ystar.shape} does not match expected shape (2, {nx}, 2)"
+            assert ystar.shape == (2, nx, 1), f"ystar shape {ystar.shape} does not match expected shape (2, {nx}, 1)"
         else:
             # rank(Astar) <= nx - 2
             ystar = f'A {nx-r}-dimensional sphere.'
 
+        # Debug
+        # print(f"ystar: {ystar}")
+        # print(f"r: {r}")
+        # print(f"Astar: {Astar}")
+        # print(f"d: {d}")
+        # print(f"gam: {gam.value}")
+        # print(f"lam: {lam.value}")
+
+        # ystar is a 3D array with shape (nsolutions, nx, 1)
+        # nsolutions is the number of solutions
+        # ystar[i] is the i-th solution with (nx,1) as the initial condition
+        
         # Check ystar solutions
         if r >= nx-1:
             def Lag(y, lam):

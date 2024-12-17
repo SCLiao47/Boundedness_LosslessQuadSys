@@ -17,13 +17,18 @@ To set up the development environment for this project, follow these steps:
    - Add `*.egg-info/` to your `.gitignore` to avoid committing build artifacts to version control.
 
 # Todo next step
-- implement 2d example
-- differentiable SDP for TR size w.r.t. coordinate shift vector m
-- gradient descent on m to find the optimal coordinate shift for mimizing TR size
-- verify the size on a grid of coordinate shift
-- compare the result from GD and actual grid of size
+- [x] implement 2d example
+- [ ] differentiable SDP for TR size w.r.t. coordinate shift vector m
+- [ ] gradient descent on m to find the optimal coordinate shift for mimizing TR size
+- [ ] verify the size on a grid of coordinate shift
+- [ ] compare the result from GD and actual grid of size
 
 # Log
+
+## 2024-12-17
+- add the script `script_TwoState_SNJFM2015.py` to analysis, simulation and visualization of the two-state model
+- fix the dimension of `ystar` in the function `func_TRSize`
+
 
 ## 2024-11-14
 - add the function `func_TRSize` to compute the size of TR using both SDP and SN method
