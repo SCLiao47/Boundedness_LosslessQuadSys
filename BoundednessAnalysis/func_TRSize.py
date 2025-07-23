@@ -9,40 +9,43 @@ def check_RelTol(a: float, b: float, option: Dict) -> Tuple[bool, float]:
     ifPass = RelErr < option['tol']
     return ifPass, RelErr
 
-def func_TRSize_SDP(model: Dict, option: Optional[Dict] = None) -> Tuple[float, Dict]:
+def setup_sdp_problem(As: np.ndarray, d: np.ndarray, nx: int) -> Tuple[cp.Problem, cp.Variable, cp.Variable]:
     """
-    Solving the size of trapping region by QCQP through dual SDP.
-    Corresponding to Section 3.2 and 3.3 of Liao et. al, 2024
+    Set up the SDP optimization problem
+    
+    Parameters:
+    -----------
+    As : ndarray
+        System matrix after shifting
+    d : ndarray
+        Linear term vector
+    nx : int
+        System dimension
+    
+    Returns:
+    --------
+    prob : cp.Problem
+        CVXPY optimization problem
+    gam : cp.Variable
+        Variable to be minimized
+    lam : cp.Variable
+        Lagrange multiplier
     """
-    if option is None:
-        option = {
-            'verbose': False,
-            'tol': 1e-6
-        }
-    
-    # Extract parameters
-    As = model.As
-    d = model.d
-    nx = model.nx
-    
-    # Check if As is negative definite
-    try:
-        np.linalg.cholesky(-As)
-    except np.linalg.LinAlgError:
-        print('As is not negative definite!')
-        return float('inf'), {}
-    
     # Utility matrices
     Inx = np.eye(nx)
     Znx = np.zeros((nx, nx))
     Znx1 = np.zeros((nx, 1))
     
-    # Lagrangian dual SDP formulation
-    flag_Lag = False
-    
-    # Setup and solve the SDP
+    # Setup variables
     gam = cp.Variable(1)
     lam = cp.Variable(1, nonneg=True)
+
+    """
+    TODO
+    - [ ] Set up m as the parameter of CVXpy
+    - [ ] compute d and As accordingly
+    - [ ] extract the gradient of the SDP solution w.r.t. m
+    """
     
     # Construct the LMI constraint
     lmi_left = cp.bmat([
@@ -57,93 +60,150 @@ def func_TRSize_SDP(model: Dict, option: Optional[Dict] = None) -> Tuple[float, 
     
     constraints = [lmi_left + lam * lmi_right >> 0]
     
-    # Solve the problem
+    # Create the problem
     prob = cp.Problem(cp.Minimize(gam), constraints)
+    
+    return prob, gam, lam
+
+def compute_critical_points(Astar: np.ndarray, d: np.ndarray, lam: float, tol: float) -> Tuple[np.ndarray, int]:
+    """
+    Compute the critical points (ystar) of the system
+    
+    Parameters:
+    -----------
+    Astar : ndarray
+        Modified system matrix
+    d : ndarray
+        Linear term vector
+    lam : float
+        Optimal Lagrange multiplier
+    tol : float
+        Tolerance for rank computation
+    
+    Returns:
+    --------
+    ystar : ndarray or str
+        Critical points or description if points form a sphere
+    r : int
+        Rank of Astar
+    """
+    nx = Astar.shape[0]
+    
+    # Compute base solution
+    y0 = -lam/2 * np.linalg.solve(Astar, d)
+    
+    # SVD decomposition for rank
+    _, S, V = svd(Astar)
+    r = np.sum(np.abs(S) > tol)
+    v = V[:, r:].T
+    
+    if r == nx:
+        ystar = y0.reshape(1, -1, 1)
+    elif r == nx-1:
+        # Solve quadratic equation for additional solutions
+        coef1 = v @ Astar @ v.T
+        coef2 = 2 * v @ Astar @ y0 + d.T @ v.T
+        coef3 = y0.T @ Astar @ y0 + d.T @ y0
+        
+        s = np.sqrt(coef2**2 - 4*coef1*coef3)
+        c = (-coef2 + np.array([s, -s])) / (2*coef1)
+        
+        ystar = y0 + v.T @ c
+        ystar = ystar.reshape(2, -1, 1)
+    else:
+        ystar = f'A {nx-r}-dimensional sphere.'
+    
+    return ystar, r
+
+def verify_solutions(ystar: np.ndarray, gam: float, lam: float, As: np.ndarray, d: np.ndarray, option: Dict):
+    """
+    Verify the computed solutions satisfy optimality conditions
+    
+    Parameters:
+    -----------
+    ystar : ndarray
+        Computed critical points
+    gam : float
+        Optimal objective value
+    lam : float
+        Optimal Lagrange multiplier
+    As : ndarray
+        System matrix
+    d : ndarray
+        Linear term vector
+    option : dict
+        Options dictionary containing tolerance settings
+    """
+    def Lag(y, lam):
+        y = y.reshape(-1, 1) if len(y.shape) == 1 else y
+        return float(y.T @ y + lam * (y.T @ As @ y + d.T @ y))
+    
+    if not isinstance(ystar, str):
+        y0 = -lam/2 * np.linalg.solve(np.eye(As.shape[0]) + lam * As, d)
+        for i in range(ystar.shape[0]):
+            ys = ystar[i]
+            
+            # Verify optimality conditions
+            assert check_RelTol(gam, float(Lag(y0, lam)), option)[0], \
+                "Error: gam* == L(ystar, lam*)"
+            assert check_RelTol(gam, float(Lag(ys, lam)), option)[0], \
+                "Error: gam* == L(ystar, lam*)"
+            
+            # Check norm condition
+            ifPass, RelErr = check_RelTol(gam, float(ys.T @ ys), option)
+            if not ifPass:
+                print(f"Warning: RelTol not satisfied: gam* == ystar'*ystar with relative error {RelErr}")
+
+def func_TRSize_SDP(model: Dict, option: Optional[Dict] = None) -> Tuple[float, Dict]:
+    """
+    Solving the size of trapping region by QCQP through dual SDP.
+    Corresponding to Section 3.2 and 3.3 of Liao et. al, 2024
+    """
+    if option is None:
+        option = {
+            'verbose': False,
+            'tol': 1e-6
+        }
+    
+    # Extract parameters
+    nx = model.nx
+    #  original coordinate
+    c = model.c
+    Ls = model.Ls
+    #  shifted coordinate
+    m = model.m
+    d = model.d
+    As = model.As
+    
+    # Check if As is negative definite
+    try:
+        np.linalg.cholesky(-As)
+    except np.linalg.LinAlgError:
+        print('As is not negative definite!')
+        return float('inf'), {}
+    
+    # Setup and solve SDP
+    prob, gam, lam = setup_sdp_problem(As, d, nx)
+    
     try:
         prob.solve(solver=cp.MOSEK, verbose=False)
     except:
         prob.solve(verbose=False)
     
-    cvx_status_Lag = prob.status
-    
-    if cvx_status_Lag == 'optimal':
-        flag_Lag = True
+    if prob.status == 'optimal':
+        # Compute critical points
+        Astar = np.eye(nx) + lam.value * As
+        ystar, r = compute_critical_points(Astar, d, lam.value, option['tol'])
         
-        # Check Astar <= 0
-        Astar = Inx + lam.value * As
-        # Check d in range(Astar)
-        assert np.linalg.norm(Astar @ d) >= np.finfo(float).eps, "d is not in range of Astar!"
-        
-        # Compute ystar using KKT condition
-        y0 = -lam.value/2 * np.linalg.solve(Astar, d)
-        
-        # SVD decomposition
-        _, S, V = svd(Astar)
-        r = np.sum(np.abs(S) > option['tol'])
-        v = V[:, r:].T
-        
-        if r == nx:
-            ystar = y0
-            ystar = ystar.reshape(1, -1, 1)
-
-            # Verify ystar has shape (1, nx, 1)
-            assert ystar.shape == (1, nx, 1), f"ystar shape {ystar.shape} does not match expected shape (1, {nx}, 1)"
-        elif r == nx-1:
-            # Solve CS, which is a quadratic equation in c
-            coef1 = v @ As @ v.T
-            coef2 = 2 * v @ As @ y0 + d.T @ v.T
-            coef3 = y0.T @ As @ y0 + d.T @ y0
-            
-            s = np.sqrt(coef2**2 - 4*coef1*coef3)
-            c = (-coef2 + np.array([s, -s])) / (2*coef1)
-            
-            ystar = y0 + v.T @ c
-            
-            # Verify ystar has shape (2, nx, 1)
-            assert ystar.shape == (2, nx, 1), f"ystar shape {ystar.shape} does not match expected shape (2, {nx}, 1)"
-        else:
-            # rank(Astar) <= nx - 2
-            ystar = f'A {nx-r}-dimensional sphere.'
-
-        # Debug
-        # print(f"ystar: {ystar}")
-        # print(f"r: {r}")
-        # print(f"Astar: {Astar}")
-        # print(f"d: {d}")
-        # print(f"gam: {gam.value}")
-        # print(f"lam: {lam.value}")
-
-        # ystar is a 3D array with shape (nsolutions, nx, 1)
-        # nsolutions is the number of solutions
-        # ystar[i] is the i-th solution with (nx,1) as the initial condition
-        
-        # Check ystar solutions
+        # Verify solutions
         if r >= nx-1:
-            def Lag(y, lam):
-                # Ensure y is a column vector
-                y = y.reshape(-1, 1) if len(y.shape) == 1 else y
-                return float(y.T @ y + lam * (y.T @ As @ y + d.T @ y))
-            
-            if not isinstance(ystar, str):
-                for i in range(ystar.shape[0]):
-                    ys = ystar[i]
-                    
-                    # Check gam* = L(ystar, lam*)
-                    assert check_RelTol(gam.value, float(Lag(y0, lam.value)), option)[0], \
-                        "Error: gam* == L(ystar, lam*)"
-                    assert check_RelTol(gam.value, float(Lag(ys, lam.value)), option)[0], \
-                        "Error: gam* == L(ystar, lam*)"
-                    
-                    # Check ystar'*ystar == L(ystar, lam*)
-                    ifPass, RelErr = check_RelTol(gam.value, float(ys.T @ ys), option)
-                    if not ifPass:
-                        print(f"Warning: RelTol not satisfied: gam* == ystar'*ystar with relative error {RelErr}")
+            verify_solutions(ystar, gam.value, lam.value, As, d, option)
         
         # Set output
         rTrap = float(np.sqrt(gam.value))
         info = {
             'feasibility': True,
-            'cvx_Lag': cvx_status_Lag,
+            'cvx_Lag': prob.status,
             'gam': gam.value,
             'lam': lam.value,
             'ystar': ystar,

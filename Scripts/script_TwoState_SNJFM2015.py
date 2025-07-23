@@ -220,7 +220,7 @@ def generate_initial_conditions(x_span=(-5, 5), y_span=(-5, 5), n_points=5):
     
     return initial_conditions
 
-def plot_boundedness_regions(m, r, r_SN, ystar=None, ax=None, show=False):
+def plot_boundedness_regions(m, r, r_SN, ystar=None, ax=None):
     """
     Plot boundedness regions and critical points
     
@@ -247,9 +247,10 @@ def plot_boundedness_regions(m, r, r_SN, ystar=None, ax=None, show=False):
     if ax is None:
         plt.figure(figsize=(8, 8))
         ax = plt.gca()
-        # Plot coordinate axes only for new figure
-        ax.axhline(y=0, color='k', linewidth=2)
-        ax.axvline(x=0, color='k', linewidth=2)
+
+    # Plot coordinate axes only for new figure
+    ax.axhline(y=0, color='k', linewidth=2)
+    ax.axvline(x=0, color='k', linewidth=2)
     
     # Plot the trapping regions
     theta = np.linspace(0, 2*np.pi, 200)
@@ -272,10 +273,6 @@ def plot_boundedness_regions(m, r, r_SN, ystar=None, ax=None, show=False):
     ax.grid(True)
     ax.set_aspect('equal')
     ax.legend()
-    
-    if show:
-        plt.tight_layout()
-        plt.show()
     
     return ax
 
@@ -320,9 +317,10 @@ def analyze_boundedness(model, option=None, show=False):
     ystar = info_TR.get('ystar', None)
     
     # Plot the boundedness regions
-    plot_boundedness_regions(m, r, r_SN, ystar, show=show)
+    if show:
+        plot_boundedness_regions(m, r, r_SN, ystar, show=show)
     
-    return m, r, r_SN, model_shifted
+    return m, r, r_SN, model_shifted, ystar
 
 if __name__ == "__main__":
     '''
@@ -337,10 +335,10 @@ if __name__ == "__main__":
     model = model_TwoState_SNJFM2015()
     
     '''
-    Analysis
+    Boundedness Analysis by Liao et al., 2024
     '''
     # Boundedness analysis
-    m, r, r_SN, model_shifted = analyze_boundedness(model)
+    m, r, r_SN, model_shifted, ystar = analyze_boundedness(model)
     
 
     '''
@@ -359,23 +357,24 @@ if __name__ == "__main__":
     '''
     # Create figure
     fig = plt.figure(figsize=(8, 8))
+    ax = plt.gca()
     
     # Plot phase portrait
-    ax = plot_phase_portrait_multiple(trajectories)
+    ax = plot_phase_portrait_multiple(trajectories, ax=ax)
     
     # Add boundedness regions
-    plot_boundedness_regions(m, r, r_SN, ax=ax)
+    plot_boundedness_regions(m, r, r_SN, ystar, ax=ax)
     
-    # Show plot
+    # # Show plot
     plt.show()
-    
+
 
     '''
-    TODO
-    - [ ] remove duplicated plots
-    - [ ] add cooridnate to the plot
-
-    - [ ] make algorithm to find the m with smallest r_SDP using gradient of SDP 
+    Finding the smallest trapping region
     
+    # TODO: 
+    1. Write a SDP function to compute the size of trapping region for a given coordinate shift m
     
+    2. Write a wrapper function 
     '''
+    # 

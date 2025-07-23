@@ -47,7 +47,8 @@ If you find this project helpful, please cite the following reference:
       year={2024},
       eprint={2401.04787},
       archivePrefix={arXiv},
-      primaryClass={math.OC}
+      primaryClass={math.OC},
+      doi={10.48550/arXiv.2401.04787}
 }
 ```
 
