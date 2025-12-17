@@ -1,5 +1,6 @@
 import numpy as np
-from typing import Callable, Optional
+import cvxpy as cp
+from typing import Callable, Optional, Union
 from dataclasses import dataclass, field
 import copy
 
@@ -33,11 +34,11 @@ class Model_LosslessQuad:
     Q: np.ndarray
     
     # Dynamics at the coordinate shift ydot = d + Ay + phi(y)
-    m: np.ndarray = field(init=False)   # Shifted coordinate, default to be 0
-    d: np.ndarray = field(init=False)   # Constant dynamics
-    A: np.ndarray = field(init=False)   # Linear dynamics
-    As: np.ndarray = field(init=False)  # Symmetric part of linear dynamics
-    Aa: np.ndarray = field(init=False)  # Asymmetric part of linear dynamics
+    m: Union[np.ndarray, cp.Variable, cp.Parameter] = field(init=False)   # Shifted coordinate, default to be 0
+    d: Union[np.ndarray, cp.Expression] = field(init=False)   # Constant dynamics
+    A: Union[np.ndarray, cp.Expression] = field(init=False)   # Linear dynamics
+    As: Union[np.ndarray, cp.Expression] = field(init=False)  # Symmetric part of linear dynamics
+    Aa: Union[np.ndarray, cp.Expression] = field(init=False)  # Asymmetric part of linear dynamics
     
     # Function handles
     ode: Callable = field(init=False)
@@ -46,7 +47,7 @@ class Model_LosslessQuad:
     dKm: Callable = field(init=False)
     
     def __init__(self, name: str, c: np.ndarray, L: np.ndarray, Q: np.ndarray, 
-                 m: Optional[np.ndarray] = None):
+                 m: Optional[Union[np.ndarray, cp.Variable, cp.Parameter]] = None):
         """Initialize the model with basic parameters."""
         self.name = name
         self.nx = c.shape[0]
@@ -71,33 +72,58 @@ class Model_LosslessQuad:
         self.ode = lambda t, x: ode_quadraticDyn(self.c, self.L, self.Q, t, x)
         self.dK0 = lambda x: self.c.T @ x + x.T @ self.Ls @ x
     
-    def func_ShiftSystem(self, m: np.ndarray):
+    def func_ShiftSystem(self, m: Union[np.ndarray, cp.Variable, cp.Parameter]):
         """Update the system for a coordinate shift."""
+        # Determine if m is a CVXPY object
+        is_cvxpy_m = isinstance(m, (cp.Variable, cp.Parameter))
+
         # Update constant part
         self.m = m
-        self.d = np.zeros((self.nx, 1))
-        for i in range(self.nx):
-            self.d[i] = (self.c[i] + 
-                        self.L[i,:] @ m + 
-                        m.T @ self.Q[:,:,i] @ m)
-        
+        if is_cvxpy_m:
+            d_components = []
+            for i in range(self.nx):
+                d_i = self.c[i] + self.L[i,:] @ m + cp.quad_form(m, self.Q[:,:,i])
+                d_components.append(d_i)
+            self.d = cp.vstack(d_components)
+        else:
+            self.d = np.zeros((self.nx, 1))
+            for i in range(self.nx):
+                self.d[i] = (self.c[i] +
+                            self.L[i,:] @ m +
+                            m.T @ self.Q[:,:,i] @ m)
+
         # Update linear part
-        self.A = np.zeros((self.nx, self.nx))
-        for i in range(self.nx):
-            self.A[i,:] = self.L[i,:] + 2 * m.T @ self.Q[:,:,i]
-        
+        if is_cvxpy_m:
+            A_components = []
+            for i in range(self.nx):
+                A_i = self.L[i,:] + 2 * m.T @ self.Q[:,:,i]
+                A_components.append(A_i)
+            self.A = cp.vstack(A_components)
+        else:
+            self.A = np.zeros((self.nx, self.nx))
+            for i in range(self.nx):
+                self.A[i,:] = self.L[i,:] + 2 * m.T @ self.Q[:,:,i]
+
         # Update symmetric parts
-        self.As = self.Ls.copy()
-        for i in range(self.nx):
-            self.As = self.As - m[i] * self.Q[:,:,i]
+        if is_cvxpy_m:
+            self.As = self.Ls
+            for i in range(self.nx):
+                self.As = self.As - m[i] * self.Q[:,:,i]
+        else:
+            self.As = self.Ls.copy()
+            for i in range(self.nx):
+                self.As = self.As - m[i] * self.Q[:,:,i]
+        
         self.Aa = self.A - self.As
         
         # Update ode and power functions
-        self.ode_shifted = lambda t, x: ode_quadraticDyn(self.d, self.A, self.Q, t, x)
-        self.dKm = lambda x: self.d.T @ x + x.T @ self.As @ x
+        # These will only work if d, A, Q are numpy arrays
+        if not is_cvxpy_m:
+            self.ode_shifted = lambda t, x: ode_quadraticDyn(self.d, self.A, self.Q, t, x)
+            self.dKm = lambda x: self.d.T @ x + x.T @ self.As @ x
         
         # Create a copy of self
-        return copy.deepcopy(self)
+        return self
     
     def get_inverseTimeModel(self):
         """Get the inverse-time model."""

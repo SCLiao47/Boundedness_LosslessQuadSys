@@ -1,3 +1,6 @@
+import sys
+import os
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 import numpy as np
 from scipy.integrate import solve_ivp
 import matplotlib.pyplot as plt
@@ -369,12 +372,4 @@ if __name__ == "__main__":
     plt.show()
 
 
-    '''
-    Finding the smallest trapping region
-    
-    # TODO: 
-    1. Write a SDP function to compute the size of trapping region for a given coordinate shift m
-    
-    2. Write a wrapper function 
-    '''
-    # 
+     
